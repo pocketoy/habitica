@@ -1622,7 +1622,7 @@ schema.methods.removeTask = async function groupRemoveTask (task) {
     'group.taskId': task._id,
   }, { userId: 1, _id: 1 }).exec();
 
-  userTasks.forEach(async userTask => {
+  for (const userTask of userTasks) {
     const assignedUser = await User.findOne({ _id: userTask.userId }, 'notifications tasksOrder').exec();
 
     let notificationIndex = assignedUser.notifications.findIndex(notification => notification
@@ -1654,7 +1654,7 @@ schema.methods.removeTask = async function groupRemoveTask (task) {
     await Tasks.Task.remove({ _id: userTask._id });
     removeFromArray(assignedUser.tasksOrder[`${task.type}s`], userTask._id);
     removalPromises.push(assignedUser.save());
-  });
+  }
 
   // Get Managers
   const managerIds = Object.keys(group.managers);
@@ -1742,7 +1742,7 @@ export const model = mongoose.model('Group', schema);
 // do not run when testing as it's handled by the tests and can easily cause a race condition
 if (!nconf.get('IS_TEST')) {
   model.countDocuments({ _id: TAVERN_ID }, (err, ct) => {
-    if (err) throw err;
+    if (err) logger.error(err);
     if (ct > 0) return;
     new model({ // eslint-disable-line new-cap
       _id: TAVERN_ID,
